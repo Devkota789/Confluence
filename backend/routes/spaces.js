@@ -1,34 +1,30 @@
-// routes/spaces.js
 const express = require('express');
-const router = express.Router();
 const Space = require('../models/Space');
-const authMiddleware = require('../middleware/auth');
+const auth = require('../middleware/auth');
+const router = express.Router();
 
 // Create space
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   const { title, description } = req.body;
   try {
-    const space = new Space({ title, description, members: [req.user.id] });
+    const space = new Space({
+      title, description, createdBy: req.user.id
+    });
     await space.save();
     res.json(space);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// Get spaces (for logged-in user)
-router.get('/', authMiddleware, async (req, res) => {
-  const spaces = await Space.find({ members: req.user.id });
-  res.json(spaces);
-});
-
-// Add a member
-router.put('/:id/add-member', authMiddleware, async (req, res) => {
-  const { userId } = req.body;
-  const space = await Space.findById(req.params.id);
-  if (!space.members.includes(userId)) {
-    space.members.push(userId);
-    await space.save();
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
   }
-  res.json(space);
+});
+
+// List spaces
+router.get('/', auth, async (req, res) => {
+  try {
+    const spaces = await Space.find().sort({ createdAt: -1 });
+    res.json(spaces);
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error' });
+  }
 });
 
 module.exports = router;

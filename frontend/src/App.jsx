@@ -1,30 +1,83 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import Register from "./features/auth/Register";
-import { Login } from "./features/auth/Login";
-import Dashboard from "./features/dashboard/Dashboard";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+
 import Home from "./features/home/Home";
-import { ProtectedRoute, PublicRoute } from "./routes/RouteGuards";
+import Login from "./features/auth/Login";
+import Register from "./features/auth/Register";
+import Dashboard from "./features/dashboard/Dashboard";
+import SpaceList from "./features/pages/SpaceList";
+import SpaceView from "./features/pages/SpaceView";
+import PageView from "./features/pages/PageView";
+import PageEditor from "./features/pages/PageEditor";
+import PageVersions from "./features/pages/PageVersions";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-const App = () => {
-  const token = localStorage.getItem("token");
-
+export default function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <AuthProvider>
       <Routes>
-        <Route element={<PublicRoute redirectTo="/dashboard" />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-        </Route>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        <Route element={<ProtectedRoute redirectTo="/login" />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
+        {/* Protected */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/spaces"
+          element={
+            <ProtectedRoute>
+              <SpaceList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/space/:id"
+          element={
+            <ProtectedRoute>
+              <SpaceView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/page/:id"
+          element={
+            <ProtectedRoute>
+              <PageView />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/page/:id/edit"
+          element={
+            <ProtectedRoute>
+              <PageEditor />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/page/:id/versions"
+          element={
+            <ProtectedRoute>
+              <PageVersions />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
-  );
-};
 
-export default App;
+      </Routes>
+    </AuthProvider>
+  );
+}
