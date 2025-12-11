@@ -16,14 +16,15 @@ function buildTree(pages) {
 function Node({ node }) {
   return (
     <div className="pl-4">
-      <div className="py-1">
-        <Link className="text-blue-600" to={`/page/${node._id}`}>
+      <div className="relative border-l border-slate-200 py-2 pl-4 text-sm text-slate-700">
+        <span className="absolute -left-[5px] top-4 h-2 w-2 -translate-x-1/2 rounded-full border border-slate-300 bg-white" />
+        <Link className="font-medium text-slate-800 hover:text-blue-600" to={`/page/${node._id}`}>
           {node.title}
         </Link>
       </div>
 
       {node.children.length > 0 && (
-        <div className="border-l pl-4">
+        <div className="border-l border-slate-200 pl-4">
           {node.children.map((child) => (
             <Node key={child._id} node={child} />
           ))}
@@ -39,7 +40,9 @@ export default function PageTree({ pages }) {
   return (
     <div>
       {roots.length === 0 && (
-        <div className="text-gray-500">No pages in this space.</div>
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+          No pages in this space.
+        </div>
       )}
       {roots.map((root) => (
         <Node key={root._id} node={root} />
@@ -47,3 +50,7 @@ export default function PageTree({ pages }) {
     </div>
   );
 }
+
+
+
+

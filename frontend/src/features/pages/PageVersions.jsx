@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+import WorkspaceShell from "../../components/WorkspaceShell";
 import API from "../../services/Api";
 
 export default function PageVersions() {
@@ -14,45 +15,74 @@ export default function PageVersions() {
   }, [id]);
 
   const revert = async (index) => {
-    if (!confirm("Revert to this version?")) return;
+    if (!window.confirm("Revert to this version?")) return;
     await API.post(`/pages/${id}/revert`, { versionIndex: index });
-    alert("Successfully reverted! Go back to page.");
+    window.alert("Successfully reverted! Go back to the page to view the update.");
   };
 
+  const sidebar = useMemo(
+    () => (
+      <div className="space-y-5 text-sm text-slate-600">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">How it works</p>
+          <p className="mt-2 text-slate-500">
+            Every save stores content, tags, and metadata. Roll back when experiments do not pan out.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Versions tracked</p>
+          <p className="mt-2 text-3xl font-semibold text-slate-900">{versions.length}</p>
+          <p className="text-xs text-slate-500">Snapshots available</p>
+        </div>
+      </div>
+    ),
+    [versions.length]
+  );
+
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Version History</h2>
+    <WorkspaceShell
+      title="Version history"
+      description="Audit edits over time, compare content, and revert with confidence."
+      sidebar={sidebar}
+    >
+      <div className="space-y-4">
+        {versions.length === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+            No previous versions available yet.
+          </div>
+        )}
 
-      {versions.length === 0 && (
-        <div>No previous versions available.</div>
-      )}
-
-      {versions.map((v, i) => (
-        <div key={i} className="border p-4 rounded mb-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="font-semibold">
-                {v.editedBy?.name || "Unknown"}
+        {versions.map((version, index) => (
+          <article
+            key={index}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  {version.editedBy?.name || "Unknown author"}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {version.editedAt
+                    ? new Date(version.editedAt).toLocaleString()
+                    : "Unknown date"}
+                </p>
               </div>
-              <div className="text-sm text-gray-600">
-                {new Date(v.editedAt).toLocaleString()}
-              </div>
+              <button
+                onClick={() => revert(index)}
+                className="rounded-xl border border-amber-300 px-4 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-50"
+              >
+                Revert to this version
+              </button>
             </div>
 
-            <button
-              onClick={() => revert(i)}
-              className="bg-yellow-500 text-white px-3 py-1 rounded"
-            >
-              Revert
-            </button>
-          </div>
-
-          <div
-            className="prose mt-4"
-            dangerouslySetInnerHTML={{ __html: v.contentHtml }}
-          />
-        </div>
-      ))}
-    </div>
+            <div
+              className="prose mt-4 max-w-none text-slate-800"
+              dangerouslySetInnerHTML={{ __html: version.contentHtml }}
+            />
+          </article>
+        ))}
+      </div>
+    </WorkspaceShell>
   );
 }

@@ -1,167 +1,199 @@
 import { Link } from "react-router-dom";
 
-const featureTiles = [
-	{
-		title: "Spaces for every team",
-		description: "Keep product specs, campaign briefs, and runbooks organized by workspace.",
-	},
-	{
-		title: "Real-time collaboration",
-		description: "Co-edit docs, leave decisions inline, and keep discussions contextual.",
-	},
-	{
-		title: "Knowledge base search",
-		description: "Surface the docs people actually use with intelligent, typo-tolerant search.",
-	},
+const highlights = [
+  {
+    title: "Spaces behave like folders",
+    description:
+      "Nest documentation by team, product line, or sprint cycle so everyone knows where to publish.",
+  },
+  {
+    title: "Pages capture the work",
+    description:
+      "Specs, briefs, and runbooks stay in sync with inline comments and decision callouts.",
+  },
+  {
+    title: "Search finds anything",
+    description: "AI-assisted search surfaces the exact page, snippet, or attachment you need.",
+  },
 ];
 
-const steps = [
-	{
-		label: "Create",
-		copy: "Start with a template for product specs, standups, or onboarding and make it yours.",
-	},
-	{
-		label: "Organize",
-		copy: "Group pages into spaces, lock permissions, and keep everything version-controlled.",
-	},
-	{
-		label: "Align",
-		copy: "Share updates with stakeholders, collect feedback, and turn ideas into action.",
-	},
+const folders = [
+  {
+    label: "Product org",
+    color: "text-sky-600",
+    rows: ["Roadmaps", "RFCs", "Discovery notes", "Launch briefs"],
+  },
+  {
+    label: "Growth team",
+    color: "text-emerald-600",
+    rows: ["Campaign calendars", "Experiment logs", "Persona library"],
+  },
+  {
+    label: "People ops",
+    color: "text-amber-600",
+    rows: ["Onboarding", "Policies", "Benefit guides"],
+  },
 ];
+
+const templates = ["Quarterly roadmap", "Design proposal", "OKR tracker", "Incident review"];
 
 const Home = () => {
-	return (
-		<div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-			<div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 py-10">
-				<nav className="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-950/60 px-6 py-4 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between">
-					<div className="flex items-center gap-3">
-						<div className="rounded-xl bg-emerald-500/20 px-3 py-1 text-sm font-semibold text-emerald-300">
-							Confluence Clone
-						</div>
-						<p className="text-xs uppercase tracking-[0.4em] text-slate-500">Workspace OS</p>
-					</div>
-					<div className="flex flex-wrap gap-3 text-sm">
-						<Link
-							className="rounded-xl border border-transparent px-4 py-2 text-slate-300 transition hover:text-white"
-							to="/login"
-						>
-							Login
-						</Link>
-						<Link
-							className="rounded-xl border border-emerald-400 px-4 py-2 text-emerald-300 transition hover:bg-emerald-400 hover:text-slate-950"
-							to="/register"
-						>
-							Get started
-						</Link>
-					</div>
-				</nav>
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6 py-10">
+        <nav className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <span className="rounded-xl bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-600">
+              Confluence Studio
+            </span>
+            <div className="hidden gap-4 text-sm text-slate-500 lg:flex">
+              <a className="transition hover:text-slate-900" href="#spaces">
+                Spaces
+              </a>
+              <a className="transition hover:text-slate-900" href="#templates">
+                Templates
+              </a>
+              <a className="transition hover:text-slate-900" href="#structure">
+                Structure
+              </a>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link
+              className="rounded-xl border border-transparent px-4 py-2 text-slate-600 transition hover:text-slate-900"
+              to="/login"
+            >
+              Login
+            </Link>
+            <Link
+              className="rounded-xl border border-blue-500 px-4 py-2 text-blue-600 transition hover:bg-blue-600 hover:text-white"
+              to="/register"
+            >
+              Get started
+            </Link>
+          </div>
+        </nav>
 
-				<header className="grid gap-10 rounded-4xl border border-slate-800 bg-slate-950/70 px-8 py-12 shadow-2xl lg:grid-cols-2">
-					<div className="space-y-6">
-						<p className="text-sm uppercase tracking-[0.4em] text-slate-500">Team knowledge, orchestrated</p>
-						<h1 className="text-4xl font-semibold leading-tight lg:text-5xl">
-							Bring every team, doc, and decision into one living workspace.
-						</h1>
-						<p className="text-lg text-slate-300">
-							Launch projects faster with AI-assisted templates, page analytics, and workflows inspired by Atlassian Confluence.
-						</p>
-						<div className="flex flex-wrap gap-4">
-							<Link
-								to="/register"
-								className="rounded-2xl bg-emerald-500 px-6 py-3 font-semibold text-slate-900 transition hover:bg-emerald-400"
-							>
-								Create free workspace
-							</Link>
-							<Link
-								to="/login"
-								className="rounded-2xl border border-slate-700 px-6 py-3 font-semibold text-slate-200 transition hover:border-slate-500"
-							>
-								View dashboard
-							</Link>
-						</div>
-						<p className="text-xs text-slate-500">No credit card required • Unlimited collaborators • Export anytime</p>
-					</div>
+        <header className="grid gap-10 rounded-4xl border border-slate-200 bg-white px-8 py-12 shadow-xl lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <p className="text-sm uppercase tracking-[0.4em] text-slate-400">
+              Modern Confluence experience
+            </p>
+            <h1 className="text-4xl font-semibold leading-tight text-slate-900 lg:text-5xl">
+              Bring folders, docs, and discussions together inside one calm workspace.
+            </h1>
+            <p className="text-lg text-slate-600">
+              Build a knowledge base that mirrors your org chart: spaces for every team, hierarchical pages for every project, and actions that keep deadlines realistic.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                to="/register"
+                className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-500"
+              >
+                Create workspace
+              </Link>
+              <Link
+                to="/login"
+                className="rounded-2xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:border-blue-300"
+              >
+                View dashboard
+              </Link>
+            </div>
+            <p className="text-xs text-slate-500">No credit card required • Unlimited viewers • Export anytime</p>
+          </div>
 
-					<div className="space-y-6 rounded-[28px] border border-emerald-500/20 bg-slate-900/80 p-6">
-						<div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-							<p className="text-xs uppercase tracking-[0.4em] text-emerald-300">Live doc preview</p>
-							<p className="mt-3 text-lg font-medium text-slate-100">Quarterly Roadmap • Product Org</p>
-							<ul className="mt-4 space-y-3 text-sm text-slate-400">
-								<li className="rounded-xl border border-slate-800/70 px-4 py-3">
-									✅ Discovery completed • Engineering handoff 03/22
-								</li>
-								<li className="rounded-xl border border-slate-800/70 px-4 py-3">
-									✏️ Drafting AI onboarding playbook
-								</li>
-								<li className="rounded-xl border border-slate-800/70 px-4 py-3">
-									💬 12 comments • 4 unresolved decisions
-								</li>
-							</ul>
-						</div>
-						<div className="rounded-2xl border border-dashed border-slate-700/70 p-5 text-sm text-slate-400">
-							Automations route feedback to the right space, trigger Jira tickets, and keep Slack in the loop.
-						</div>
-					</div>
-				</header>
+          <div className="space-y-6 rounded-3xl border border-slate-200 bg-slate-50 p-6">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5">
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Live tree preview</p>
+              <div className="mt-4 grid gap-3">
+                {folders.map((folder) => (
+                  <div key={folder.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className={`text-sm font-semibold ${folder.color}`}>{folder.label}</p>
+                    <ul className="mt-2 space-y-1 text-xs text-slate-500">
+                      {folder.rows.map((row) => (
+                        <li key={row} className="flex items-center gap-2">
+                          <span className="text-slate-400">▸</span>
+                          {row}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-				<section className="grid gap-6 lg:grid-cols-3">
-					{featureTiles.map((tile) => (
-						<article
-							key={tile.title}
-							className="rounded-3xl border border-slate-800 bg-slate-950/60 p-6 shadow-lg"
-						>
-							<p className="text-xs uppercase tracking-[0.4em] text-slate-500">Feature</p>
-							<h3 className="mt-4 text-xl font-semibold">{tile.title}</h3>
-							<p className="mt-3 text-sm text-slate-400">{tile.description}</p>
-						</article>
-					))}
-				</section>
+            <div className="rounded-2xl border border-dashed border-slate-300 p-5 text-sm text-slate-500">
+              Automations route approvals to Jira, notify Slack channels, and keep everyone aligned.
+            </div>
+          </div>
+        </header>
 
-				<section className="rounded-4xl border border-slate-800 bg-slate-950/70 p-8">
-					<div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-						<div className="lg:w-1/3">
-							<p className="text-xs uppercase tracking-[0.3em] text-slate-500">How teams flow</p>
-							<h2 className="mt-3 text-2xl font-semibold">Plan → Publish → Align</h2>
-						</div>
-						<div className="flex-1 space-y-6">
-							{steps.map((step, index) => (
-								<div key={step.label} className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
-									<div className="flex items-center justify-between">
-										<h3 className="text-lg font-semibold">{step.label}</h3>
-										<span className="text-xs text-slate-500">0{index + 1}</span>
-									</div>
-									<p className="mt-2 text-sm text-slate-400">{step.copy}</p>
-								</div>
-							))}
-						</div>
-					</div>
-				</section>
+        <section id="spaces" className="grid gap-6 lg:grid-cols-3">
+          {highlights.map((item) => (
+            <article key={item.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Feature</p>
+              <h3 className="mt-4 text-xl font-semibold text-slate-900">{item.title}</h3>
+              <p className="mt-3 text-sm text-slate-600">{item.description}</p>
+            </article>
+          ))}
+        </section>
 
-				<section className="rounded-4xl border border-emerald-500/30 bg-linear-to-r from-emerald-500/20 via-slate-900 to-slate-950 p-8 text-center shadow-2xl">
-					<p className="text-xs uppercase tracking-[0.4em] text-emerald-200">Ready when you are</p>
-					<h2 className="mt-4 text-3xl font-semibold">Start organizing your company knowledge today.</h2>
-					<p className="mt-3 text-sm text-emerald-100/80">
-						Spin up a space, invite teammates, and bring documentation, decisions, and updates into one collaborative hub.
-					</p>
-					<div className="mt-6 flex flex-wrap justify-center gap-4">
-						<Link
-							to="/register"
-							className="rounded-2xl bg-emerald-500 px-8 py-3 font-semibold text-slate-900 transition hover:bg-emerald-400"
-						>
-							Create workspace
-						</Link>
-						<Link
-							to="/login"
-							className="rounded-2xl border border-emerald-400 px-8 py-3 font-semibold text-emerald-200 transition hover:bg-emerald-400/10"
-						>
-							Explore dashboard
-						</Link>
-					</div>
-				</section>
-			</div>
-		</div>
-	);
+        <section id="structure" className="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+            <div className="lg:w-1/3">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Folder-first thinking</p>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-900">Plan → Publish → Align</h2>
+              <p className="mt-3 text-sm text-slate-600">
+                Spaces behave like clearly labeled folders. Inside them, nested pages inherit context, permissions, and history.
+              </p>
+            </div>
+            <div className="flex-1 space-y-4">
+              {folders.map((folder) => (
+                <div key={folder.label} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-slate-900">{folder.label}</h3>
+                    <span className="text-xs text-slate-500">{folder.rows.length} pages</span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-600">
+                    {folder.rows.map((row) => (
+                      <span key={row} className="rounded-full border border-slate-200 bg-white px-3 py-1">
+                        {row}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="templates" className="rounded-4xl border border-slate-200 bg-linear-to-r from-blue-50 via-white to-blue-50 p-8 shadow-sm">
+          <p className="text-xs uppercase tracking-[0.4em] text-blue-500">Templates</p>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">
+            Start from curated structures inspired by Atlassian Confluence.
+          </h2>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {templates.map((template) => (
+              <span key={template} className="rounded-2xl border border-blue-200 bg-white px-4 py-2 text-sm text-slate-700">
+                {template}
+              </span>
+            ))}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-4">
+            <Link to="/register" className="rounded-2xl bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-500">
+              Create workspace
+            </Link>
+            <Link
+              to="/login"
+              className="rounded-2xl border border-blue-300 px-8 py-3 font-semibold text-blue-600 transition hover:border-blue-500"
+            >
+              Explore dashboard
+            </Link>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 };
 
 export default Home;

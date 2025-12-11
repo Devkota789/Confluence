@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import WorkspaceShell from "../../components/WorkspaceShell";
 import API from "../../services/Api";
 
 export default function PageView() {
@@ -13,34 +14,66 @@ export default function PageView() {
     })();
   }, [id]);
 
-  if (!page) return <div className="p-6">Loading...</div>;
+  const metaSidebar = useMemo(() => {
+    if (!page) return null;
+    return (
+      <div className="flex flex-col gap-6 text-sm text-slate-600">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Details</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Last edited {page.updatedAt ? new Date(page.updatedAt).toLocaleString() : "recently"}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Tags</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(page.tags && page.tags.length ? page.tags : ["Uncategorized"]).map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+          Store decisions, checklists, and resources exactly where teammates expect them.
+        </div>
+      </div>
+    );
+  }, [page]);
+
+  if (!page) return <div className="p-10 text-center text-slate-400">Loading page...</div>;
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">{page.title}</h1>
-
-        <div className="flex gap-2">
-          <Link
-            to={`/page/${id}/edit`}
-            className="px-3 py-1 bg-yellow-500 text-white rounded"
-          >
-            Edit
-          </Link>
-
+    <WorkspaceShell
+      title={page.title}
+      description={page.description || "Living documentation"}
+      sidebar={metaSidebar}
+      actions={
+        <>
           <Link
             to={`/page/${id}/versions`}
-            className="px-3 py-1 bg-gray-300 rounded"
+            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-300"
           >
             Versions
           </Link>
-        </div>
-      </div>
-
-      <div
-        className="prose"
-        dangerouslySetInnerHTML={{ __html: page.contentHtml }}
+          <Link
+            to={`/page/${id}/edit`}
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500"
+          >
+            Edit page
+          </Link>
+        </>
+      }
+    >
+      <article
+        className="prose max-w-none text-slate-800"
+        dangerouslySetInnerHTML={{ __html: page.contentHtml || "<p>No content yet.</p>" }}
       />
-    </div>
+    </WorkspaceShell>
   );
 }
