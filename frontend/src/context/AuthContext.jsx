@@ -1,32 +1,61 @@
-import { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { authAPI } from '../services/api';
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() =>
-    JSON.parse(localStorage.getItem("user")) || null
-  );
-  const [token, setToken] = useState(() =>
-    localStorage.getItem("token") || null
-  );
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (userData, jwtToken) => {
-    setUser(userData);
-    setToken(jwtToken);
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", jwtToken);
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const response = await authAPI.getMe();
+        setUser(response.data);
+      } catch (error) {
+        localStorage.removeItem('token');
+      }
+    }
+    setLoading(false);
+  };
+
+  const login = async (email, password) => {
+    const response = await authAPI.login({ email, password });
+    localStorage.setItem('token', response.data.token);
+    setUser(response.data.user);
+    return response.data;
+  };
+
+  const register = async (name, email, password) => {
+    const response = await authAPI.register({ name, email, password });
+    localStorage.setItem('token', response.data.token);
+    setUser(response.data.user);
+    return response.data;
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
     setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
+    
+    
   );
 };

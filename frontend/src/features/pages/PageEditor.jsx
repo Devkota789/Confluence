@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Editor } from "@tinymce/tinymce-react";
 import WorkspaceShell from "../../components/WorkspaceShell";
-import API from "../../services/Api";
+import API from "";
 
 export default function PageEditor() {
   const { id } = useParams();

@@ -1,83 +1,92 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Layout/Navbar';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import HomePage from './pages/HomePage';
+import SpacesPage from './pages/SpacesPage';
+import SpaceDetailPage from './pages/SpaceDetailPage';
+import PageViewPage from './pages/PageViewPage';
+import AdminPage from './pages/AdminPage';
+import NotFoundPage from './pages/NotFoundPage';
 
-import Home from "./features/home/Home";
-import Login from "./features/auth/Login";
-import Register from "./features/auth/Register";
-import Dashboard from "./features/dashboard/Dashboard";
-import SpaceList from "./features/pages/SpaceList";
-import SpaceView from "./features/pages/SpaceView";
-import PageView from "./features/pages/PageView";
-import PageEditor from "./features/pages/PageEditor";
-import PageVersions from "./features/pages/PageVersions";
-import ProtectedRoute from "./components/ProtectedRoute";
+const LoadingState = () => (
+  <div className="flex h-screen items-center justify-center text-slate-600">
+    Loading...
+  </div>
+);
 
-export default function App() {
+const PrivateRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingState />;
+  return user ? children : <Navigate to="/login" replace />;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+  if (loading) return <LoadingState />;
+  if (!user) return <Navigate to="/login" replace />;
+  return isAdmin ? children : <Navigate to="/" replace />;
+};
+
+function AppContent() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <HomePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/spaces"
+        element={
+          <PrivateRoute>
+            <SpacesPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/spaces/:spaceId"
+        element={
+          <PrivateRoute>
+            <SpaceDetailPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pages/:pageId"
+        element={
+          <PrivateRoute>
+            <PageViewPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
+
+function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Protected */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/spaces"
-          element={
-            <ProtectedRoute>
-              <SpaceList />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/space/:id"
-          element={
-            <ProtectedRoute>
-              <SpaceView />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/page/:id"
-          element={
-            <ProtectedRoute>
-              <PageView />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/page/:id/edit"
-          element={
-            <ProtectedRoute>
-              <PageEditor />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/page/:id/versions"
-          element={
-            <ProtectedRoute>
-              <PageVersions />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
-
-      </Routes>
+      <Navbar />
+      <AppContent />
     </AuthProvider>
   );
 }
+
+export default App;

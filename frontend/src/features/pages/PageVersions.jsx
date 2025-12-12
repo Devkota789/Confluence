@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import WorkspaceShell from "../../components/WorkspaceShell";
-import API from "../../services/Api";
+import API from "frontend/src/services/Api.js";
 
 export default function PageVersions() {
   const { id } = useParams();

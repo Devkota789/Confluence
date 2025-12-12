@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import WorkspaceShell from "../../components/WorkspaceShell";
-import API from "../../services/Api";
+import API from "../../services/api";
 
 export default function SpaceList() {
   const [spaces, setSpaces] = useState([]);
