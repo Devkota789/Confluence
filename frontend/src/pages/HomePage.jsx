@@ -36,7 +36,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div className="min-h-screen bg-linear-to-b from-blue-50 to-white">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
@@ -106,7 +106,7 @@ const HomePage = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-20 bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-8 text-white">
+        <div className="mt-20 bg-linear-to-r from-primary to-blue-600 rounded-2xl p-8 text-white">
           <h2 className="text-3xl font-bold mb-4">Quick Start Guide</h2>
           <div className="space-y-3">
             <div className="flex items-start space-x-3">

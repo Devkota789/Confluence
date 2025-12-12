@@ -19,7 +19,7 @@ const AdminPage = () => {
     try {
       const response = await adminAPI.getUsers();
       setUsers(response.data.users);
-    } catch (err) {
+    } catch {
       setError('Failed to load users');
     } finally {
       setLoading(false);
@@ -80,7 +80,7 @@ const AdminPage = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl shadow-lg p-8 mb-8 text-white">
+        <div className="bg-linear-to-r from-purple-600 to-purple-800 rounded-xl shadow-lg p-8 mb-8 text-white">
           <div className="flex items-center space-x-3 mb-4">
             <Shield size={48} />
             <div>

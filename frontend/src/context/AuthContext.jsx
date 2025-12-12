@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { authAPI } from '../services/api';
 
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await authAPI.getMe();
         setUser(response.data);
-      } catch (error) {
+      } catch {
         localStorage.removeItem('token');
       }
     }
@@ -55,7 +56,5 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
-    
-    
   );
 };

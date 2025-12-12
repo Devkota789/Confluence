@@ -1,6 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import API from "../../services/api";
 
 const quickActions = [
@@ -10,7 +10,7 @@ const quickActions = [
 ];
 
 export default function Dashboard() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout } = useAuth();
   const [spaces, setSpaces] = useState([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function Dashboard() {
       try {
         const res = await API.get("/spaces");
         setSpaces(res.data.slice(0, 4));
-      } catch (error) {
+      } catch {
         setSpaces([]);
       }
     })();
@@ -64,7 +64,7 @@ export default function Dashboard() {
               {spaces.map((space) => (
                 <Link
                   key={space._id}
-                  to={`/space/${space._id}`}
+                  to={`/spaces/${space._id}`}
                   className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-blue-300"
                 >
                   <div>

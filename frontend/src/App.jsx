@@ -10,6 +10,8 @@ import SpaceDetailPage from './pages/SpaceDetailPage';
 import PageViewPage from './pages/PageViewPage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
+import PageEditor from './features/pages/PageEditor';
+import PageVersions from './features/pages/PageVersions';
 
 const LoadingState = () => (
   <div className="flex h-screen items-center justify-center text-slate-600">
@@ -64,6 +66,22 @@ function AppContent() {
         element={
           <PrivateRoute>
             <PageViewPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pages/:pageId/edit"
+        element={
+          <PrivateRoute>
+            <PageEditor />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pages/:pageId/versions"
+        element={
+          <PrivateRoute>
+            <PageVersions />
           </PrivateRoute>
         }
       />

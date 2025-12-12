@@ -5,7 +5,7 @@ import { Home, Search } from 'lucide-react';
 
 const NotFoundPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-purple-50 flex items-center justify-center px-4">
       <div className="text-center">
         <div className="mb-8">
           <h1 className="text-9xl font-bold text-primary mb-4">404</h1>

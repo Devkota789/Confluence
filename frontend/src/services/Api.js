@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -39,6 +39,9 @@ export const pagesAPI = {
   create: (data) => api.post('/pages', data),
   update: (id, data) => api.put(`/pages/${id}`, data),
   delete: (id) => api.delete(`/pages/${id}`),
+  getVersions: (id) => api.get(`/pages/${id}/versions`),
+  revertToVersion: (id, versionIndex) => api.post(`/pages/${id}/revert`, { versionIndex }),
+  move: (id, parent) => api.patch(`/pages/${id}/move`, { parent }),
 };
 
 // Admin
