@@ -1,4 +1,4 @@
-import apiClient from "./Api";
+import apiClient from "./api";
 
 export const registerUser = async (payload) => {
   const { data } = await apiClient.post("/auth/register", payload);
@@ -10,3 +10,6 @@ export const loginUser = async (payload) => {
   const { data } = await apiClient.post("/auth/login", payload);
   return data;
 };
+
+
+

@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Editor } from '@tinymce/tinymce-react';
+import JoditEditor from 'jodit-react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import 'jodit/es2021/jodit.min.css';
 import WorkspaceShell from '../../components/WorkspaceShell';
 import { pagesAPI } from '../../services/api';
 
 export default function PageEditor() {
   const { pageId } = useParams();
   const navigate = useNavigate();
+  const editorRef = useRef(null);
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -49,6 +51,53 @@ export default function PageEditor() {
       setIsSaving(false);
     }
   };
+
+  const editorConfig = useMemo(
+    () => ({
+      readonly: false,
+      placeholder: 'Start typing...',
+      height: '100%',
+      toolbarAdaptive: false,
+      buttons: [
+        'bold',
+        'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'ul',
+        'ol',
+        '|',
+        'font',
+        'fontsize',
+        'brush',
+        'paragraph',
+        '|',
+        'image',
+        'table',
+        'link',
+        '|',
+        'align',
+        'undo',
+        'redo',
+        '|',
+        'hr',
+        'copyformat',
+        'fullsize',
+      ],
+      uploader: {
+        insertImageAsBase64URI: true,
+      },
+    }),
+    []
+  );
+
+  const handleEditorBlur = useCallback((newContent) => {
+    setContent(newContent);
+  }, []);
+
+  const handleEditorChange = useCallback((newContent) => {
+    setContent(newContent);
+  }, []);
 
   const sidebar = useMemo(
     () => (
@@ -118,38 +167,15 @@ export default function PageEditor() {
             onChange={(event) => setTitle(event.target.value)}
           />
 
-          <Editor
-            apiKey="m7nx3p9l7r8y5izr8zir8cc336u5trwqk1jm6wszyqc72t6y"
-            value={content}
-            init={{
-              height: 540,
-              menubar: true,
-              skin: 'oxide',
-              content_css: 'default',
-              plugins: [
-                'advlist',
-                'autolink',
-                'lists',
-                'link',
-                'image',
-                'charmap',
-                'preview',
-                'anchor',
-                'searchreplace',
-                'visualblocks',
-                'code',
-                'fullscreen',
-                'insertdatetime',
-                'media',
-                'table',
-                'help',
-                'wordcount',
-              ],
-              toolbar:
-                'undo redo | blocks | bold italic forecolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-            }}
-            onEditorChange={(newHtml) => setContent(newHtml)}
-          />
+          <div className="min-h-[520px] rounded-2xl border border-slate-200 bg-white p-2">
+            <JoditEditor
+              ref={editorRef}
+              value={content}
+              config={editorConfig}
+              onBlur={handleEditorBlur}
+              onChange={handleEditorChange}
+            />
+          </div>
         </div>
       )}
     </WorkspaceShell>
