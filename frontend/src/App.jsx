@@ -11,7 +11,7 @@ import PageViewPage from './pages/PageViewPage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PageEditor from './features/pages/PageEditor';
-import PageVersions from './features/pages/PageVersions';
+
 
 const LoadingState = () => (
   <div className="flex h-screen items-center justify-center text-slate-600">
@@ -77,14 +77,14 @@ function AppContent() {
           </PrivateRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/pages/:pageId/versions"
         element={
           <PrivateRoute>
             <PageVersions />
           </PrivateRoute>
         }
-      />
+      /> */}
       <Route
         path="/admin"
         element={

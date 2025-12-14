@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import JoditEditor from 'jodit-react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Save, X } from 'lucide-react';
 import 'jodit/es2021/jodit.min.css';
-import WorkspaceShell from '../../components/WorkspaceShell';
 import { pagesAPI } from '../../services/api';
 
 export default function PageEditor() {
@@ -56,7 +55,7 @@ export default function PageEditor() {
     () => ({
       readonly: false,
       placeholder: 'Start typing...',
-      height: '100%',
+      height: '100vh',
       toolbarAdaptive: false,
       buttons: [
         'bold',
@@ -99,75 +98,60 @@ export default function PageEditor() {
     setContent(newContent);
   }, []);
 
-  const sidebar = useMemo(
-    () => (
-      <div className="space-y-5 text-sm text-slate-600">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Editing tips</p>
-          <p className="mt-2 text-slate-500">
-            Keep sections short and link to specs or dashboards for supporting data.
-          </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Status</p>
-          <p className="mt-2 font-semibold text-slate-900">{isSaving ? 'Saving changes…' : 'Drafting'}</p>
-          <p className="text-xs text-slate-500">Changes persist when you click Save.</p>
-        </div>
-      </div>
-    ),
-    [isSaving]
-  );
-
   return (
-    <WorkspaceShell
-      title="Page editor"
-      description="Craft structured documentation with rich media, embeds, and callouts."
-      sidebar={sidebar}
-      actions={
-        <>
+    <div className="min-h-screen bg-white pt-16">
+      {/* Fixed Header */}
+      <header className="fixed top-16 left-0 right-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-300"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition"
           >
+            <X className="h-4 w-4" />
             Cancel
           </button>
-          <button
-            onClick={savePage}
-            disabled={isSaving || !title.trim()}
-            className="rounded-2xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-60"
-          >
-            {isSaving ? 'Saving…' : 'Save page'}
-          </button>
-        </>
-      }
-    >
-      {error && (
-        <div className="flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <AlertTriangle className="h-4 w-4" />
-          {error}
-          <button
-            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-red-600"
-            onClick={fetchPage}
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> Retry
-          </button>
+          <div className="text-sm text-gray-500">
+            Editing: {title || 'Untitled Page'}
+          </div>
         </div>
-      )}
+        <button
+          onClick={savePage}
+          disabled={isSaving || !title.trim()}
+          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition"
+        >
+          <Save className="h-4 w-4" />
+          {isSaving ? 'Saving…' : 'Save'}
+        </button>
+      </header>
 
-      {loading ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
-          Loading editor…
-        </div>
-      ) : (
-        <div className="space-y-6">
-          <input
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-2xl font-semibold text-slate-900 placeholder-slate-400 focus:border-blue-400 focus:outline-none"
-            placeholder="Page title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-          />
+      {/* Main Content */}
+      <main className="pt-20">
+        {error && (
+          <div className="absolute top-20 left-6 right-6 z-20 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertTriangle className="h-4 w-4" />
+            {error}
+            <button
+              className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-red-600"
+              onClick={fetchPage}
+            >
+              <RefreshCw className="h-3.5 w-3.5" /> Retry
+            </button>
+          </div>
+        )}
 
-          <div className="min-h-[520px] rounded-2xl border border-slate-200 bg-white p-2">
+        {loading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-sm text-gray-500">Loading editor…</div>
+          </div>
+        ) : (
+          <div className="relative">
+            <input
+              className="absolute top-0 left-0 right-0 z-10 w-full border-none bg-white px-6 py-4 text-3xl font-bold text-gray-900 placeholder-gray-400 focus:outline-none shadow-md"
+              placeholder="Page title"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+            />
+
             <JoditEditor
               ref={editorRef}
               value={content}
@@ -176,8 +160,8 @@ export default function PageEditor() {
               onChange={handleEditorChange}
             />
           </div>
-        </div>
-      )}
-    </WorkspaceShell>
+        )}
+      </main>
+    </div>
   );
 }
