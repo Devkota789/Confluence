@@ -1,9 +1,11 @@
 // src/pages/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../services/api';
-import { Shield, User, Mail, Calendar, Edit, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Shield, User, Mail, Calendar, Edit, Trash2, AlertCircle, CheckCircle, Crown } from 'lucide-react';
 
 const AdminPage = () => {
+  const { isSuperAdmin } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -57,6 +59,8 @@ const AdminPage = () => {
 
   const getRoleBadgeColor = (role) => {
     switch (role) {
+      case 'superadmin':
+        return 'bg-amber-100 text-amber-800';
       case 'admin':
         return 'bg-purple-100 text-purple-800';
       case 'editor':
@@ -86,6 +90,11 @@ const AdminPage = () => {
             <div>
               <h1 className="text-4xl font-bold">Admin Dashboard</h1>
               <p className="text-purple-100 mt-2">Manage users and their permissions</p>
+              {isSuperAdmin && (
+                <p className="mt-2 text-xs uppercase tracking-[0.4em] text-amber-200">
+                  Super admin mode
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -126,6 +135,18 @@ const AdminPage = () => {
                 </p>
               </div>
               <Shield className="text-purple-500" size={40} />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Super Admins</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
+                  {users.filter(u => u.role === 'superadmin').length}
+                </p>
+              </div>
+              <Crown className="text-amber-500" size={40} />
             </div>
           </div>
 
@@ -195,6 +216,7 @@ const AdminPage = () => {
                           onChange={(e) => setNewRole(e.target.value)}
                           className="px-3 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
                         >
+                          <option value="superadmin">Super Admin</option>
                           <option value="admin">Admin</option>
                           <option value="editor">Editor</option>
                           <option value="viewer">Viewer</option>
@@ -232,23 +254,32 @@ const AdminPage = () => {
                         </div>
                       ) : (
                         <div className="flex space-x-3">
-                          <button
-                            onClick={() => {
-                              setEditingUser(user._id);
-                              setNewRole(user.role);
-                            }}
-                            className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
-                          >
-                            <Edit size={16} />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user._id)}
-                            className="text-red-600 hover:text-red-900 flex items-center space-x-1"
-                          >
-                            <Trash2 size={16} />
-                            <span>Delete</span>
-                          </button>
+                          {user.role !== 'superadmin' && (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setEditingUser(user._id);
+                                  setNewRole(user.role);
+                                }}
+                                className="text-blue-600 hover:text-blue-900 flex items-center space-x-1"
+                              >
+                                <Edit size={16} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteUser(user._id)}
+                                className="text-red-600 hover:text-red-900 flex items-center space-x-1"
+                              >
+                                <Trash2 size={16} />
+                                <span>Delete</span>
+                              </button>
+                            </>
+                          )}
+                          {user.role === 'superadmin' && (
+                            <span className="text-xs uppercase tracking-widest text-amber-500 font-semibold">
+                              Protected
+                            </span>
+                          )}
                         </div>
                       )}
                     </td>

@@ -26,10 +26,10 @@ const PrivateRoute = ({ children }) => {
 };
 
 const AdminRoute = ({ children }) => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading, isSuperAdmin } = useAuth();
   if (loading) return <LoadingState />;
   if (!user) return <Navigate to="/login" replace />;
-  return isAdmin ? children : <Navigate to="/" replace />;
+  return isSuperAdmin ? children : <Navigate to="/" replace />;
 };
 
 function AppContent() {

@@ -5,7 +5,7 @@ const requireRole = require('../middleware/role');
 const User = require('../models/User');
 
 // Get all users with pagination
-router.get('/users', auth, requireRole('admin'), async (req, res) => {
+router.get('/users', auth, requireRole('superadmin'), async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -26,7 +26,7 @@ router.get('/users', auth, requireRole('admin'), async (req, res) => {
 });
 
 // Get single user
-router.get('/users/:id', auth, requireRole('admin'), async (req, res) => {
+router.get('/users/:id', auth, requireRole('superadmin'), async (req, res) => {
   try {
     const u = await User.findById(req.params.id).select('-password');
     if (!u) return res.status(404).json({ message: 'User not found' });
@@ -37,10 +37,11 @@ router.get('/users/:id', auth, requireRole('admin'), async (req, res) => {
 });
 
 // Change role
-router.put('/users/:id/role', auth, requireRole('admin'), async (req, res) => {
+router.put('/users/:id/role', auth, requireRole('superadmin'), async (req, res) => {
   try {
     const { role } = req.body;
-    if (!['user', 'editor', 'admin'].includes(role)) {
+    const allowedRoles = ['viewer', 'editor', 'admin', 'superadmin'];
+    if (!allowedRoles.includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
@@ -69,7 +70,7 @@ router.put('/users/:id/role', auth, requireRole('admin'), async (req, res) => {
 });
 
 // Delete user
-router.delete('/users/:id', auth, requireRole('admin'), async (req, res) => {
+router.delete('/users/:id', auth, requireRole('superadmin'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });

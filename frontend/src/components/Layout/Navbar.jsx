@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { LogOut, User, Home, FileText, Shield } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isSuperAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -40,7 +40,7 @@ const Navbar = () => {
                 <FileText size={18} />
                 <span>Spaces</span>
               </Link>
-              {isAdmin && (
+              {isSuperAdmin && (
                 <Link 
                   to="/admin" 
                   className="flex items-center space-x-1 px-4 py-2 rounded-lg text-purple-600 hover:bg-purple-50 transition"

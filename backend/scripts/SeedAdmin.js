@@ -13,7 +13,7 @@ console.log('Admin exists:', email);
 process.exit(0);
 }
 const hashed = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD || 'AdminPass123!', 10);
-const admin = new User({ name: 'Admin', email, password: hashed, role: 'admin' });
+const admin = new User({ name: 'Super Admin', email, password: hashed, role: 'superadmin' });
 await admin.save();
 console.log('Admin created:', admin.email);
 process.exit(0);
