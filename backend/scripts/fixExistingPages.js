@@ -1,133 +1,103 @@
-const mongoose = require('mongoose');
+/**
+ * FIX EXISTING PAGES MIGRATION SCRIPT
+ * ---------------------------------
+ * - Migrates old Page schema to new schema
+ * - Moves versions[] → Content collection
+ * - Sets contentHtml correctly
+ * - Removes legacy fields (content, versions)
+ */
+
 require('dotenv').config();
+const mongoose = require('mongoose');
+const Page = require('../models/Page');
+const Content = require('../models/Content');
 
-async function fixExistingPages() {
-  try {
-    console.log('🔧 Starting migration...\n');
-    
-    await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
-    console.log('✅ Connected to MongoDB\n');
+const MONGO_URI = process.env.MONGO_URI;
 
-    const pagesCollection = mongoose.connection.collection('pages');
-    const contentsCollection = mongoose.connection.collection('contents');
+async function migrate() {
+  console.log('🔧 Starting migration...\n');
 
-    const allPages = await pagesCollection.find({}).toArray();
-    console.log(`📄 Found ${allPages.length} pages\n`);
+  await mongoose.connect(MONGO_URI);
+  console.log('✅ Connected to MongoDB\n');
 
-    let fixedCount = 0;
-    let migratedCount = 0;
+  const pages = await Page.find({});
+  console.log(`📄 Found ${pages.length} pages\n`);
 
-    for (const page of allPages) {
-      console.log(`Processing: ${page.title}`);
+  let fixed = 0;
+  let migrated = 0;
 
-      const updates = {};
-      let needsUpdate = false;
+  for (const page of pages) {
+    console.log(`Processing: ${page.title}`);
 
-      // Add missing fields
-      if (page.currentVersion === undefined) {
-        const contentCount = await contentsCollection.countDocuments({ 
-          pageId: page._id 
-        });
-        updates.currentVersion = contentCount > 0 ? contentCount : 1;
-        needsUpdate = true;
-        console.log(`  ✓ Added currentVersion: ${updates.currentVersion}`);
-      }
+    const hasOldContent = !!page.content;
+    const hasOldVersions = Array.isArray(page.versions) && page.versions.length > 0;
 
-      if (page.totalVersions === undefined) {
-        const contentCount = await contentsCollection.countDocuments({ 
-          pageId: page._id 
-        });
-        updates.totalVersions = contentCount > 0 ? contentCount : 1;
-        needsUpdate = true;
-        console.log(`  ✓ Added totalVersions: ${updates.totalVersions}`);
-      }
-
-      if (!page.lastEditedBy) {
-        updates.lastEditedBy = page.createdBy;
-        needsUpdate = true;
-        console.log(`  ✓ Added lastEditedBy`);
-      }
-
-      // Migrate content to Content collection
-      const hasOldContent = page.content || page.contentHtml;
-      const hasContentDoc = await contentsCollection.countDocuments({ 
-        pageId: page._id 
-      }) > 0;
-
-      if (hasOldContent && !hasContentDoc) {
-        console.log(`  📦 Migrating content...`);
-        
-        // Create main content
-        await contentsCollection.insertOne({
-          pageId: page._id,
-          content: page.content || page.contentHtml || '',
-          version: 1,
-          isLatest: true,
-          editedBy: page.createdBy,
-          editedAt: page.updatedAt || page.createdAt || new Date()
-        });
-
-        // Migrate old versions
-        if (page.versions && Array.isArray(page.versions)) {
-          console.log(`  📚 Migrating ${page.versions.length} versions...`);
-          
-          for (let i = 0; i < page.versions.length; i++) {
-            const v = page.versions[i];
-            await contentsCollection.insertOne({
-              pageId: page._id,
-              content: v.content || '',
-              version: i + 2,
-              isLatest: false,
-              editedBy: v.editedBy || page.createdBy,
-              editedAt: v.editedAt || new Date()
-            });
-          }
-
-          updates.currentVersion = page.versions.length + 1;
-          updates.totalVersions = page.versions.length + 1;
-        }
-
-        // Remove old fields
-        const unset = {};
-        if (page.content !== undefined) unset.content = '';
-        if (page.contentHtml !== undefined) unset.contentHtml = '';
-        if (page.versions !== undefined) unset.versions = '';
-
-        if (Object.keys(unset).length > 0) {
-          await pagesCollection.updateOne(
-            { _id: page._id },
-            { $unset: unset }
-          );
-          console.log(`  🧹 Cleaned up old fields`);
-        }
-
-        migratedCount++;
-      }
-
-      // Apply updates
-      if (needsUpdate) {
-        await pagesCollection.updateOne(
-          { _id: page._id },
-          { $set: updates }
-        );
-        fixedCount++;
-      }
-
-      console.log('');
+    // If already clean → skip
+    if (!hasOldContent && !hasOldVersions) {
+      console.log('  ⏭️  Already migrated\n');
+      continue;
     }
 
-    console.log('='.repeat(50));
-    console.log('✅ Migration Complete!');
-    console.log(`   Fixed: ${fixedCount} pages`);
-    console.log(`   Migrated: ${migratedCount} pages`);
-    console.log('='.repeat(50));
+    // 1️⃣ Migrate versions → Content collection
+    if (hasOldVersions) {
+      for (let i = 0; i < page.versions.length; i++) {
+        const v = page.versions[i];
 
-  } catch (error) {
-    console.error('❌ Migration failed:', error.message);
-  } finally {
-    await mongoose.disconnect();
-    console.log('\n👋 Disconnected');
+        const exists = await Content.findOne({
+          page: page._id,
+          version: i + 1,
+        });
+
+        if (!exists) {
+          await Content.create({
+            page: page._id,
+            version: i + 1,
+            contentHtml: v.content,
+            editedBy: v.editedBy,
+            createdAt: v.editedAt,
+          });
+        }
+      }
+
+      migrated++;
+    }
+
+    // 2️⃣ Set contentHtml from latest version or old content
+    if (!page.contentHtml) {
+      if (hasOldVersions) {
+        const latest = page.versions[page.versions.length - 1];
+        page.contentHtml = latest.content;
+      } else if (hasOldContent) {
+        page.contentHtml = page.content;
+      }
+    }
+
+    // 3️⃣ Fix counters
+    const totalVersions = await Content.countDocuments({ page: page._id });
+    page.totalVersions = totalVersions;
+    page.currentVersion = totalVersions;
+
+    // 4️⃣ REMOVE legacy fields
+    page.content = undefined;
+    page.versions = undefined;
+
+    await page.save();
+
+    fixed++;
+    console.log('  ✅ Fixed\n');
   }
+
+  console.log('==========================================');
+  console.log('✅ Migration Complete!');
+  console.log(`   Fixed Pages: ${fixed}`);
+  console.log(`   Migrated Versions: ${migrated}`);
+  console.log('==========================================\n');
+
+  await mongoose.disconnect();
+  console.log('👋 Disconnected');
 }
 
-fixExistingPages();
+migrate().catch((err) => {
+  console.error('❌ Migration failed:', err);
+  process.exit(1);
+});
