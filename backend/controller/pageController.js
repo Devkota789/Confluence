@@ -27,7 +27,7 @@ exports.createPage = async (req, res) => {
 
     await Content.create({
       pageId: page._id,
-      content,
+      content: content || '',
       version: 1,
       isLatest: true,
       editedBy: req.user.id,
@@ -128,7 +128,7 @@ exports.revertPage = async (req, res) => {
 
     await Content.create({
       pageId: page._id,
-      content: target.content,
+      content: target.content || '',
       version: newVersion,
       isLatest: true,
       editedBy: req.user.id,

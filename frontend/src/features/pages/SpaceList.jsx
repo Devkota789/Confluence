@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderOpen, Plus, Users } from 'lucide-react';
+import { FolderOpen, Plus, Users, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import WorkspaceShell from '../../components/WorkspaceShell';
 import { spacesAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -14,6 +15,7 @@ export default function SpaceList() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   const loadSpaces = async () => {
     setLoading(true);
@@ -42,8 +44,10 @@ export default function SpaceList() {
       setTitle('');
       setDescription('');
       setError('');
+      setShowModal(false);
+      toast.success('Space created successfully!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create space');
+      toast.error(err.response?.data?.message || 'Failed to create space');
     } finally {
       setCreating(false);
     }
@@ -60,16 +64,17 @@ export default function SpaceList() {
       description="Curate focused hubs for every team, program, or initiative."
       sidebar={null}
       rightSidebar={null}
+      searchQuery={query}
+      onSearchChange={setQuery}
+      searchPlaceholder="Search spaces..."
       actions={
         isAdmin && (
           <button
-            form="create-space"
-            type="submit"
-            disabled={creating}
-            className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500 disabled:opacity-60"
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-500"
           >
             <Plus className="h-4 w-4" />
-            {creating ? 'Creating...' : 'New space'}
+            New space
           </button>
         )
       }
@@ -78,30 +83,7 @@ export default function SpaceList() {
         <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>
       )}
 
-      {isAdmin && (
-        <form
-          id="create-space"
-          onSubmit={createSpace}
-          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <p className="text-sm font-semibold text-slate-900">Create a new space</p>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <input
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:outline-none"
-              placeholder="Space title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              required
-            />
-            <input
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:outline-none"
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-          </div>
-        </form>
-      )}
+      {/* Removed the old form */}
 
       <div className="grid gap-4">
         {loading && (
@@ -147,6 +129,66 @@ export default function SpaceList() {
             </Link>
           ))}
       </div>
-    </WorkspaceShell>
+      {/* Modal for creating space */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Create New Space</h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={createSpace}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Space Title *
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    placeholder="Enter space title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                    placeholder="Enter description (optional)"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creating}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {creating ? 'Creating...' : 'Create Space'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}    </WorkspaceShell>
   );
 }

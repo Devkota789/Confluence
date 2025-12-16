@@ -9,7 +9,9 @@ const ContentSchema = new mongoose.Schema({
 
   content: {
     type: String,
-    required: true
+    default: '',
+    required: false,
+    trim: true,
   },
 
   version: {

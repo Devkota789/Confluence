@@ -15,6 +15,7 @@ import {
   Star,
   X,
 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import 'jodit/es2021/jodit.min.css';
 import { pagesAPI, spacesAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -131,6 +132,11 @@ export default function SpaceView() {
   const [editorContent, setEditorContent] = useState('');
   const [lastEdited, setLastEdited] = useState('');
   const [autosaveState, setAutosaveState] = useState('idle');
+  const [showCreatePageModal, setShowCreatePageModal] = useState(false);
+  const [showCreateSpaceModal, setShowCreateSpaceModal] = useState(false);
+  const [newPageTitle, setNewPageTitle] = useState('');
+  const [newSpaceTitle, setNewSpaceTitle] = useState('');
+  const [newSpaceDescription, setNewSpaceDescription] = useState('');
 
   const editorRef = useRef(null);
   const autosaveTimer = useRef(null);
@@ -265,12 +271,11 @@ export default function SpaceView() {
 
   const handleCreatePage = async () => {
     if (!canEdit || !activeSpaceId) return;
-    const title = window.prompt('Name your new page');
-    if (!title || !title.trim()) return;
+    if (!newPageTitle.trim()) return;
     try {
       setStatusMessage('Creating page…');
       const res = await pagesAPI.create({
-        title: title.trim(),
+        title: newPageTitle.trim(),
         content: '<p>Start typing…</p>',
         space: activeSpaceId,
         parent: null,
@@ -278,9 +283,13 @@ export default function SpaceView() {
       await fetchPagesForSpace(activeSpaceId);
       handlePageSelect(activeSpaceId, res.data._id);
       setStatusMessage('Page created');
+      setShowCreatePageModal(false);
+      setNewPageTitle('');
+      toast.success('Page created successfully!');
     } catch (err) {
       setStatusMessage('Unable to create page');
       setError(err.response?.data?.message || 'Unable to create page right now');
+      toast.error(err.response?.data?.message || 'Unable to create page right now');
     }
   };
 
@@ -289,10 +298,9 @@ export default function SpaceView() {
       navigate('/spaces');
       return;
     }
-    const title = window.prompt('Space name');
-    if (!title || !title.trim()) return;
+    if (!newSpaceTitle.trim()) return;
     try {
-      const res = await spacesAPI.create({ title: title.trim(), description: '' });
+      const res = await spacesAPI.create({ title: newSpaceTitle.trim(), description: newSpaceDescription });
       await fetchSpaces();
       setActiveSpaceId(res.data._id);
       setExpandedSpaces((prev) => {
@@ -300,8 +308,12 @@ export default function SpaceView() {
         next.add(res.data._id);
         return next;
       });
+      setShowCreateSpaceModal(false);
+      setNewSpaceTitle('');
+      setNewSpaceDescription('');
+      toast.success('Space created successfully!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to create a space');
+      toast.error(err.response?.data?.message || 'Unable to create space right now');
     }
   };
 
@@ -520,7 +532,7 @@ export default function SpaceView() {
       <div className="sticky bottom-0 border-t border-[#E5E7EB] bg-[#F9FAFB] p-4">
         <button
           type="button"
-          onClick={handleCreatePage}
+          onClick={() => setShowCreatePageModal(true)}
           disabled={!canEdit || !activeSpaceId}
           className="flex w-full items-center justify-center gap-2 rounded-md bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -529,7 +541,7 @@ export default function SpaceView() {
         </button>
         <button
           type="button"
-          onClick={handleCreateSpace}
+          onClick={() => setShowCreateSpaceModal(true)}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-md border border-[#D1D5DB] bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[#F3F4F6]"
         >
           <Folder className="h-4 w-4 text-slate-500" />
@@ -700,6 +712,74 @@ export default function SpaceView() {
           <div className="flex-1 overflow-y-auto">{sidebarContent}</div>
         </div>
       </div>
+
+      {/* Create Page Modal */}
+      {showCreatePageModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Create New Page</h2>
+            <input
+              type="text"
+              placeholder="Page Title"
+              value={newPageTitle}
+              onChange={(e) => setNewPageTitle(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowCreatePageModal(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePage}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Space Modal */}
+      {showCreateSpaceModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Create New Space</h2>
+            <input
+              type="text"
+              placeholder="Space Name"
+              value={newSpaceTitle}
+              onChange={(e) => setNewSpaceTitle(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+            />
+            <textarea
+              placeholder="Space Description"
+              value={newSpaceDescription}
+              onChange={(e) => setNewSpaceDescription(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded mb-4"
+              rows="3"
+            />
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => setShowCreateSpaceModal(false)}
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateSpace}
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
