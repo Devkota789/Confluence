@@ -379,9 +379,13 @@ export default function SpaceView() {
   const editorConfig = useMemo(
     () => ({
       readonly: !canEdit,
-      placeholder: 'Start typing...',
-      height: '100%',
-      toolbarAdaptive: false,
+      placeholder: 'Start writing here...',
+      autofocus: true,
+      toolbarButtonSize: 'small',
+      height: 'calc(100vh - 250px)',
+      minHeight: '500px',
+      iframe: true,
+      iframeStyle: 'html{margin: 0; padding: 0; min-height: 100%;} body {padding: 20px; margin: 0; min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.6; color: #333; background: #fff; }',
       buttons: [
         'bold',
         'italic',
@@ -390,6 +394,8 @@ export default function SpaceView() {
         '|',
         'ul',
         'ol',
+        'outdent',
+        'indent',
         '|',
         'font',
         'fontsize',
@@ -411,6 +417,13 @@ export default function SpaceView() {
       uploader: {
         insertImageAsBase64URI: true,
       },
+      style: {
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+        fontSize: '16px',
+        lineHeight: '1.6',
+        color: '#333',
+      },
+      zIndex: 0,
     }),
     [canEdit]
   );
@@ -601,13 +614,14 @@ export default function SpaceView() {
             Loading page content…
           </div>
         ) : (
-          <div className="min-h-[520px] rounded-lg border border-[#E5E7EB] bg-white p-4 shadow-sm">
+          <div className="h-[calc(100vh-250px)] min-h-[500px] w-full rounded-lg border border-[#E5E7EB] bg-white shadow-sm overflow-hidden">
             <JoditEditor
               ref={editorRef}
               value={editorContent}
               config={editorConfig}
               onBlur={(newContent) => canEdit && setEditorContent(newContent)}
               onChange={(newContent) => canEdit && setEditorContent(newContent)}
+              className="h-full w-full"
             />
           </div>
         )}

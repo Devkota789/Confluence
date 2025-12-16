@@ -121,7 +121,7 @@ export default function PageEditor() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-40">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
           <p className="text-gray-600">Loading editor...</p>
@@ -130,45 +130,46 @@ export default function PageEditor() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex-1 flex flex-col p-4 md:p-6">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Edit Page</h1>
-            <div className="flex gap-2">
-              <button
-                onClick={handleCancel}
-                disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <X className="w-4 h-4" />
-                Cancel
-              </button>
-              <button
-                onClick={savePage}
-                disabled={isSaving || !title.trim() || !hasUnsavedChanges}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    Save Page
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
 
-          {/* Success Alert */}
+  return (
+    <div className="fixed inset-0 bg-white flex flex-col z-40 h-screen w-screen">
+      <div className="flex flex-col h-full w-full overflow-hidden">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-200 bg-white flex items-center justify-between gap-3">
+          <h1 className="text-2xl font-bold text-gray-900">Edit Page</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCancel}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </button>
+            <button
+              onClick={savePage}
+              disabled={isSaving || !title.trim() || !hasUnsavedChanges}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Page
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Alerts + Title */}
+        <div className="px-4 py-3 space-y-3 border-b border-gray-200 bg-white">
           {successMessage && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2 mb-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
               <div className="flex-1">
                 <p className="text-green-800 text-sm">{successMessage}</p>
               </div>
@@ -181,9 +182,8 @@ export default function PageEditor() {
             </div>
           )}
 
-          {/* Error Alert */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 mb-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-red-800 text-sm">{error}</p>
@@ -197,7 +197,6 @@ export default function PageEditor() {
             </div>
           )}
 
-          {/* Title Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Page Title *
@@ -213,12 +212,7 @@ export default function PageEditor() {
         </div>
 
         {/* Editor */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1 flex flex-col">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Content
-          </label>
-          
-          {/* Toolbar */}
+        <div className="flex-1 flex flex-col bg-white">
           <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex flex-wrap gap-1 flex-shrink-0">
             <button
               onClick={() => executeCommand('bold')}
@@ -319,14 +313,17 @@ export default function PageEditor() {
           </div>
 
           {/* Editor Area */}
-          <div
-            ref={editorRef}
-            contentEditable
-            dangerouslySetInnerHTML={{ __html: content }}
-            onInput={handleContentChange}
-            onBlur={handleContentChange}
-            className="border border-t-0 border-gray-300 rounded-b-lg p-4 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto"
-          />
+          <div className="flex-1 flex flex-col border border-gray-300 rounded-t-lg overflow-hidden">
+            <div className="flex-1 overflow-auto p-4">
+              <div
+                ref={editorRef}
+                contentEditable
+                className="min-h-full outline-none"
+                dangerouslySetInnerHTML={{ __html: content }}
+                onInput={handleContentChange}
+              />
+            </div>
+          </div>
           
           {hasUnsavedChanges && (
             <p className="text-sm text-amber-600 mt-2 flex items-center gap-1">
