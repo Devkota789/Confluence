@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderOpen, Plus, Users, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FolderOpen, Plus, Users, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import WorkspaceShell from '../../components/WorkspaceShell';
 import { spacesAPI } from '../../services/api';
@@ -16,6 +16,8 @@ export default function SpaceList() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   const loadSpaces = async () => {
     setLoading(true);
@@ -58,6 +60,21 @@ export default function SpaceList() {
     return spaces.filter((space) => space.title.toLowerCase().includes(query.toLowerCase()));
   }, [query, spaces]);
 
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(filteredSpaces.length / pageSize)),
+    [filteredSpaces.length]
+  );
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredSpaces.length / pageSize));
+    setPage((prev) => Math.min(prev, maxPage));
+  }, [filteredSpaces.length]);
+
+  const paginatedSpaces = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredSpaces.slice(start, start + pageSize);
+  }, [filteredSpaces, page]);
+
   return (
     <WorkspaceShell
       title="Spaces & folders"
@@ -99,7 +116,7 @@ export default function SpaceList() {
         )}
 
         {!loading &&
-          filteredSpaces.map((space) => (
+          paginatedSpaces.map((space) => (
             <Link
               key={space._id}
               to={`/spaces/${space._id}`}
@@ -128,6 +145,33 @@ export default function SpaceList() {
               </div>
             </Link>
           ))}
+
+        {!loading && filteredSpaces.length > 0 && totalPages > 1 && (
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-sm text-slate-600">
+            <span>
+              Showing {paginatedSpaces.length} of {filteredSpaces.length} spaces
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 transition hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </button>
+              <span className="text-slate-500">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 transition hover:border-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       {/* Modal for creating space */}
       {showModal && (
