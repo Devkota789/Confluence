@@ -18,7 +18,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 text-xl font-bold text-primary hover:text-primary-dark transition">
+          <Link to="/" className="flex items-center space-x-2 text-xl font-bold text-blue-700 hover:text-blue-800 transition">
             <span className="text-2xl">📚</span>
             <span>Confluence</span>
           </Link>
@@ -28,14 +28,14 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-1">
               <Link 
                 to="/" 
-                className="flex items-center space-x-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+                className="flex items-center space-x-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
               >
                 <Home size={18} />
                 <span>Home</span>
               </Link>
               <Link 
                 to="/spaces" 
-                className="flex items-center space-x-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+                className="flex items-center space-x-1 px-4 py-2 rounded-lg text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
               >
                 <FileText size={18} />
                 <span>Spaces</span>
@@ -75,13 +75,13 @@ const Navbar = () => {
               <div className="flex items-center space-x-2">
                 <Link 
                   to="/login" 
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                  className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition"
                 >
                   Login
                 </Link>
                 <Link 
                   to="/register" 
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                 >
                   Register
                 </Link>

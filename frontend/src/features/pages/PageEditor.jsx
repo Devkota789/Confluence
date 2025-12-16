@@ -1,30 +1,50 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import JoditEditor from 'jodit-react';
-import { AlertTriangle, RefreshCw, Save, X } from 'lucide-react';
-import 'jodit/es2021/jodit.min.css';
-import { pagesAPI } from '../../services/api';
+import { AlertTriangle, RefreshCw, Save, X, Bold, Italic, Underline, List, ListOrdered, Link as LinkIcon, Image, AlignLeft, AlignCenter, AlignRight, Undo, Redo } from 'lucide-react';
+
+// Mock API for demo
+const pagesAPI = {
+  getById: async (id) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return {
+      data: {
+        title: 'Sample Page Title',
+        content: '<p>Start editing your content here...</p>'
+      }
+    };
+  },
+  update: async (id, data) => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return { data };
+  }
+};
 
 export default function PageEditor() {
-  const { pageId } = useParams();
-  const navigate = useNavigate();
+  const pageId = '123';
   const editorRef = useRef(null);
-
+  
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [originalData, setOriginalData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!originalData) return false;
+    return title !== originalData.title || content !== originalData.content;
+  }, [title, content, originalData]);
 
   const fetchPage = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await pagesAPI.getById(pageId);
       setTitle(res.data.title);
       setContent(res.data.content || '');
-      setError('');
-    } catch {
-      setError('Unable to load page for editing');
+      setOriginalData({ title: res.data.title, content: res.data.content || '' });
+    } catch (err) {
+      setError('Unable to load page. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -34,134 +54,289 @@ export default function PageEditor() {
     fetchPage();
   }, [fetchPage]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
   const savePage = async () => {
     if (!title.trim()) {
       setError('Title is required');
       return;
     }
+
     try {
       setIsSaving(true);
-      await pagesAPI.update(pageId, { title, content });
       setError('');
-      navigate(`/pages/${pageId}`);
+      setSuccessMessage('');
+      await pagesAPI.update(pageId, { title, content });
+      setOriginalData({ title, content });
+      setSuccessMessage('Page saved successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Save failed');
+      setError(err.response?.data?.message || 'Failed to save. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const editorConfig = useMemo(
-    () => ({
-      readonly: false,
-      placeholder: 'Start typing...',
-      height: '100vh',
-      toolbarAdaptive: false,
-      buttons: [
-        'bold',
-        'italic',
-        'underline',
-        'strikethrough',
-        '|',
-        'ul',
-        'ol',
-        '|',
-        'font',
-        'fontsize',
-        'brush',
-        'paragraph',
-        '|',
-        'image',
-        'table',
-        'link',
-        '|',
-        'align',
-        'undo',
-        'redo',
-        '|',
-        'hr',
-        'copyformat',
-        'fullsize',
-      ],
-      uploader: {
-        insertImageAsBase64URI: true,
-      },
-    }),
-    []
-  );
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+        setTitle(originalData.title);
+        setContent(originalData.content);
+      }
+    }
+  };
 
-  const handleEditorBlur = useCallback((newContent) => {
-    setContent(newContent);
-  }, []);
+  const executeCommand = (command, value = null) => {
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+  };
 
-  const handleEditorChange = useCallback((newContent) => {
-    setContent(newContent);
-  }, []);
+  const insertLink = () => {
+    const url = prompt('Enter URL:');
+    if (url) {
+      executeCommand('createLink', url);
+    }
+  };
+
+  const insertImage = () => {
+    const url = prompt('Enter image URL:');
+    if (url) {
+      executeCommand('insertImage', url);
+    }
+  };
+
+  const handleContentChange = (e) => {
+    setContent(e.target.innerHTML);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
+          <p className="text-gray-600">Loading editor...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-white pt-16">
-      {/* Fixed Header */}
-      <header className="fixed top-16 left-0 right-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition"
-          >
-            <X className="h-4 w-4" />
-            Cancel
-          </button>
-          <div className="text-sm text-gray-500">
-            Editing: {title || 'Untitled Page'}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className="flex-1 flex flex-col p-4 md:p-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">Edit Page</h1>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Cancel
+              </button>
+              <button
+                onClick={savePage}
+                disabled={isSaving || !title.trim() || !hasUnsavedChanges}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Page
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Success Alert */}
+          {successMessage && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2 mb-4">
+              <div className="flex-1">
+                <p className="text-green-800 text-sm">{successMessage}</p>
+              </div>
+              <button
+                onClick={() => setSuccessMessage('')}
+                className="text-green-600 hover:text-green-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Error Alert */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 mb-4">
+              <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+              <button
+                onClick={() => setError('')}
+                className="text-red-600 hover:text-red-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Title Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Page Title *
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter page title"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            />
           </div>
         </div>
-        <button
-          onClick={savePage}
-          disabled={isSaving || !title.trim()}
-          className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition"
-        >
-          <Save className="h-4 w-4" />
-          {isSaving ? 'Saving…' : 'Save'}
-        </button>
-      </header>
 
-      {/* Main Content */}
-      <main className="pt-20">
-        {error && (
-          <div className="absolute top-20 left-6 right-6 z-20 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <AlertTriangle className="h-4 w-4" />
-            {error}
+        {/* Editor */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1 flex flex-col">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Content
+          </label>
+          
+          {/* Toolbar */}
+          <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex flex-wrap gap-1 flex-shrink-0">
             <button
-              className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-red-600"
-              onClick={fetchPage}
+              onClick={() => executeCommand('bold')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Bold"
             >
-              <RefreshCw className="h-3.5 w-3.5" /> Retry
+              <Bold className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('italic')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Italic"
+            >
+              <Italic className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('underline')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Underline"
+            >
+              <Underline className="w-4 h-4" />
+            </button>
+            
+            <div className="w-px bg-gray-300 mx-1" />
+            
+            <button
+              onClick={() => executeCommand('insertUnorderedList')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Bullet List"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('insertOrderedList')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Numbered List"
+            >
+              <ListOrdered className="w-4 h-4" />
+            </button>
+            
+            <div className="w-px bg-gray-300 mx-1" />
+            
+            <button
+              onClick={insertLink}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Insert Link"
+            >
+              <LinkIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={insertImage}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Insert Image"
+            >
+              <Image className="w-4 h-4" />
+            </button>
+            
+            <div className="w-px bg-gray-300 mx-1" />
+            
+            <button
+              onClick={() => executeCommand('justifyLeft')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Align Left"
+            >
+              <AlignLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('justifyCenter')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Align Center"
+            >
+              <AlignCenter className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('justifyRight')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Align Right"
+            >
+              <AlignRight className="w-4 h-4" />
+            </button>
+            
+            <div className="w-px bg-gray-300 mx-1" />
+            
+            <button
+              onClick={() => executeCommand('undo')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Undo"
+            >
+              <Undo className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => executeCommand('redo')}
+              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              title="Redo"
+            >
+              <Redo className="w-4 h-4" />
             </button>
           </div>
-        )}
 
-        {loading ? (
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-sm text-gray-500">Loading editor…</div>
-          </div>
-        ) : (
-          <div className="relative">
-            <input
-              className="absolute top-0 left-0 right-0 z-10 w-full border-none bg-white px-6 py-4 text-3xl font-bold text-gray-900 placeholder-gray-400 focus:outline-none shadow-md"
-              placeholder="Page title"
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-            />
-
-            <JoditEditor
-              ref={editorRef}
-              value={content}
-              config={editorConfig}
-              onBlur={handleEditorBlur}
-              onChange={handleEditorChange}
-            />
-          </div>
-        )}
-      </main>
+          {/* Editor Area */}
+          <div
+            ref={editorRef}
+            contentEditable
+            dangerouslySetInnerHTML={{ __html: content }}
+            onInput={handleContentChange}
+            onBlur={handleContentChange}
+            className="border border-t-0 border-gray-300 rounded-b-lg p-4 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto"
+          />
+          
+          {hasUnsavedChanges && (
+            <p className="text-sm text-amber-600 mt-2 flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4" />
+              You have unsaved changes
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
+            

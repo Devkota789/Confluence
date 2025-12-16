@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FolderOpen, Plus, Search, Sparkles, Users } from 'lucide-react';
+import { FolderOpen, Plus, Users } from 'lucide-react';
 import WorkspaceShell from '../../components/WorkspaceShell';
 import { spacesAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -54,70 +54,12 @@ export default function SpaceList() {
     return spaces.filter((space) => space.title.toLowerCase().includes(query.toLowerCase()));
   }, [query, spaces]);
 
-  const sidebar = (
-    <div className="space-y-6 text-sm">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-400">Search</p>
-        <div className="mt-3 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2">
-          <Search className="h-4 w-4 text-slate-400" />
-          <input
-            className="w-full border-none bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none"
-            placeholder="Filter spaces"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Overview</p>
-        <p className="mt-3 text-3xl font-semibold text-slate-900">{spaces.length}</p>
-        <p className="text-xs text-slate-500">Spaces in this workspace</p>
-      </div>
-
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Tip</p>
-        <p className="mt-2 text-slate-600">
-          Organize work like folders—spaces collect strategy docs, runbooks, and project briefs in one place.
-        </p>
-      </div>
-    </div>
-  );
-
-  const rightSidebar = (
-    <div className="space-y-4 text-sm text-slate-600">
-      <div className="rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 p-5 text-white">
-        <Sparkles className="h-6 w-6" />
-        <h3 className="mt-4 text-lg font-semibold">Best practices</h3>
-        <p className="mt-2 text-sm text-slate-100">
-          Keep each space focused on a single program. Use nested pages for roadmaps, retros, and SOPs.
-        </p>
-      </div>
-      <div className="rounded-2xl border border-slate-200 bg-white p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Activity</p>
-        <div className="mt-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Teams involved</span>
-            <span className="flex items-center gap-1 text-sm font-semibold text-slate-800">
-              <Users className="h-4 w-4" />
-              {spaces.reduce((acc, space) => acc + (space.members?.length || 0), 0)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-slate-500">Templates suggested</span>
-            <span className="text-sm font-semibold text-slate-800">Quarterly plan · Postmortem</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <WorkspaceShell
       title="Spaces & folders"
       description="Curate focused hubs for every team, program, or initiative."
-      sidebar={sidebar}
-      rightSidebar={rightSidebar}
+      sidebar={null}
+      rightSidebar={null}
       actions={
         isAdmin && (
           <button

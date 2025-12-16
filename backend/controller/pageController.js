@@ -146,6 +146,7 @@ exports.revertPage = async (req, res) => {
   }
 };
 
+
 exports.deletePage = async (req, res) => {
   try {
     await Content.deleteMany({ pageId: req.params.id });
