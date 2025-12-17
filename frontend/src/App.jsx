@@ -8,7 +8,7 @@ import HomePage from './pages/HomePage';
 import SpacesPage from './pages/SpacesPage';
 import SpaceDetailPage from './pages/SpaceDetailPage';
 import PageViewPage from './pages/PageViewPage';
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/admin/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 import PageEditor from './features/pages/PageEditor';
 

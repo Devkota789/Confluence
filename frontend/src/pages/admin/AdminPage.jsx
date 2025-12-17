@@ -1,7 +1,7 @@
 // src/pages/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
-import { adminAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { adminAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import { Shield, User, Mail, Calendar, Edit, Trash2, AlertCircle, CheckCircle, Crown } from 'lucide-react';
 
 const AdminPage = () => {

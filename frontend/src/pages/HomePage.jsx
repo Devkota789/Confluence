@@ -55,15 +55,15 @@ const HomePage = () => {
               Browse Spaces
               <ArrowRight className="ml-2" size={20} />
             </Link>
-            {isAdmin && (
+            {/* {isAdmin && (
               <Link 
                 to="/admin" 
                 className="inline-flex items-center px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium text-lg shadow-lg hover:shadow-xl"
               >
                 <Shield className="mr-2" size={20} />
                 Admin Panel
-              </Link>
-            )}
+              </Link> */}
+        
           </div>
         </div>
 
