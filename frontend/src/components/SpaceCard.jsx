@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users } from 'lucide-react';
+import { Users, FolderOpen } from 'lucide-react';
 
 export default function SpaceCard({ space }) {
   const initials = (space.title || 'S')
@@ -13,7 +13,7 @@ export default function SpaceCard({ space }) {
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white dark:bg-slate-800/70 p-3 shadow-sm transition hover:shadow md:p-4">
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 relative">
         {avatarUrl ? (
           <img
             src={avatarUrl}
@@ -25,6 +25,10 @@ export default function SpaceCard({ space }) {
             {initials}
           </div>
         )}
+
+        <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-md bg-white border border-slate-200 dark:bg-slate-800 dark:border-slate-700">
+          <FolderOpen className="h-3 w-3 text-slate-600 dark:text-slate-300" />
+        </span>
       </div>
 
       <div className="min-w-0 flex-1">
