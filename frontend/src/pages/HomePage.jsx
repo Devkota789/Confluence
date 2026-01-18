@@ -123,7 +123,7 @@ const HomePage = () => {
             </div>
             <div className="flex items-start space-x-3">
               <span className="bg-white text-blue-600 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</span>
-              <p className="text-lg">Use markdown tkdskfdslkldskdsklo formkklkkjat your content beautifully</p>
+              <p className="text-lg">Use markdown  formkklkkjat your content beautifully</p>
             </div>
           </div>
         </div>
